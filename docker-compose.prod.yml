@@ -1,0 +1,18 @@
+# 生产：只暴露 80/443；DB/Redis 仅容器网络内可达；always 重启
+services:
+  mysql:
+    restart: always
+  redis:
+    restart: always
+  api:
+    restart: always
+    environment:
+      SPRING_PROFILES_ACTIVE: prod   # 无 profile yml，所有差异都靠环境变量覆盖
+  web:
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/nginx/nginx.prod.conf:/etc/nginx/nginx.conf:ro
+      - ./deploy/nginx/cert:/etc/nginx/cert:ro

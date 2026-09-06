@@ -1,19 +1,21 @@
-# 使用官方 Nginx 镜像作为基础镜像
-#FROM nginx:alpine
-FROM nginx:1.24-alpine
-COPY ./cert /etc/nginx/cert
+# syntax=docker/dockerfile:1.7
+FROM node:20-alpine AS build
+WORKDIR /app
 
-# 删除默认的 Nginx 配置文件
-RUN rm /etc/nginx/conf.d/default.conf
+COPY package.json package-lock.json ./
+# 默认走国内镜像源（与 README 保持一致）；其他网络可用 --build-arg NPM_REGISTRY=https://registry.npmjs.org 覆盖
+ARG NPM_REGISTRY=https://registry.npmmirror.com
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci --registry=${NPM_REGISTRY} --no-audit --no-fund
 
-# 将自定义的 nginx.conf 配置文件复制到容器中的 Nginx 配置目录
-COPY ./nginx.conf /etc/nginx/nginx.conf
+COPY . .
 
-# 将 Vue 项目的构建文件复制到 Nginx 的 html 目录
-COPY ./dist /usr/share/nginx/html
+# .env.production → VUE_APP_BASE_API=/prod-api
+RUN npm run build:prod
 
-# 暴露容器的端口（80 是 Nginx 默认的 HTTP 端口）
-EXPOSE 88
-
-# 启动 Nginx 服务
+FROM nginx:alpine
+COPY --from=build /app/dist /usr/share/nginx/html
+# nginx.conf 运行时由 compose 挂载（deploy/nginx/nginx.dev.conf / nginx.prod.conf），
+# 证书仅在 prod 由 compose 挂载 —— 都不打进镜像，切换环境无需重建
+EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]

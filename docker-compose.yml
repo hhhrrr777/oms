@@ -1,0 +1,83 @@
+name: qihang-oms
+
+services:
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set it in .env (see .env.example)}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-qihang-oms}
+      TZ: ${TZ:-Asia/Shanghai}
+    command:
+      - --character-set-server=utf8mb4
+      - --default-time-zone=+08:00
+    volumes:
+      - mysql-data:/var/lib/mysql
+      # dump 无 CREATE DATABASE；entrypoint 在首次初始化时对 MYSQL_DATABASE 执行
+      - ./docs/qihang-oms.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    healthcheck:
+      # 首次初始化期间临时 server 网络是关闭的，-h 127.0.0.1 只有真正就绪才通
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$${MYSQL_ROOT_PASSWORD} --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .            # 仓库根 —— reactor 需要看到兄弟模块
+      dockerfile: api/Dockerfile
+    image: qihang-oms/api:2.2.0
+    environment:
+      TZ: ${TZ:-Asia/Shanghai}
+      # 覆盖 application.yml 里硬编码的 localhost；不改动 yml。
+      # useSSL=false + allowPublicKeyRetrieval=true：容器网内 MySQL8 caching_sha2 所需
+      SPRING_DATASOURCE_URL: "jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-qihang-oms}?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=GMT%2B8"
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      SPRING_DATA_REDIS_HOST: redis
+    volumes:
+      - api-logs:/app/logs   # logback LOG_HOME=./logs 相对 WORKDIR /app
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      # 无 actuator → TCP 探测（temurin jammy 自带 bash）
+      test: ["CMD-SHELL", "bash -c '</dev/tcp/127.0.0.1/8086' || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 90s
+
+  web:
+    build:
+      context: ./vue2
+      dockerfile: Dockerfile
+    image: qihang-oms/web:4.0.1
+    # 基础文件故意不挂载 nginx.conf、不发布端口 —— 都放在 dev/prod 覆盖文件里
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:80/ || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+volumes:
+  mysql-data:
+  redis-data:
+  api-logs:

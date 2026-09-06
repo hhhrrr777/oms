@@ -1,0 +1,18 @@
+# 全容器化 dev：web(88) api(8086) mysql(3306) redis(6379) 全部发布，便于本地工具访问
+services:
+  mysql:
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+  redis:
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+  api:
+    ports:
+      - "8086:8086"
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+  web:
+    ports:
+      - "88:80"
+    volumes:
+      - ./deploy/nginx/nginx.dev.conf:/etc/nginx/nginx.conf:ro

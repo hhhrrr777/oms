@@ -180,52 +180,98 @@ A[录入拦截] -->B(通知仓库)
 
 #### 0 版本说明
 + Java：17
-+ Nodejs：v16
++ Nodejs：v16 ~ v22（本地构建时；Docker 镜像内使用 Node 20）
 + SpringBoot:3
 + MySQL:8
 + Redis:7
++ Docker & Docker Compose（推荐部署方式所需）
 
-#### 1 配置MySQL
+#### 1 Docker Compose 部署（推荐）
 
-+ 创建数据库`qihang-oms`
-+ 导入数据库结构：sql脚本`docs\qihang-oms.sql`
-
-#### 2 启动Redis
-
-#### 3 修改项目配置
-
-+ 修改`api`项目中的配置文件`application.yml`配置`Mysql`相关配置。
-
-#### 4 mvn打包部署
-+ Java版本：`Java 17`
-+ Maven版本：`3.8`
-  `mvn clean package`
-
-#### 5 前端 `vue`打包
-+ nodejs版本要求：`v16.x`
-+ 安装依赖：`npm install --registry=https://registry.npmmirror.com`
-+ 打包`npm run build:prod`
-
-#### 6 修改Nginx配置
+无需本地 JDK/Node/Maven，一条命令构建并启动完整技术栈（nginx + api + mysql + redis）。
 
 ```
-# 前端web配置
+# 1. 准备环境变量
+cp .env.example .env        # 修改 MYSQL_ROOT_PASSWORD
+
+# 2. dev 环境（web:88 api:8086 mysql:3306 redis:6379）
+make dev                    # 等价于: docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build
+
+# 3. prod 环境（web:80/443 TLS，不暴露 db 端口；需先把证书放入 deploy/nginx/cert/）
+make prod
+```
+
+说明：
+
++ nginx 配置按环境运行时挂载（`deploy/nginx/nginx.dev.conf` / `nginx.prod.conf`），切换环境无需 cp、无需重建镜像
++ MySQL 首次启动自动导入 `docs/qihang-oms.sql`（124 表 + 种子数据）；若初始化中途被打断，`make clean`（会删数据卷）后重新启动
++ 后端 MySQL/Redis 地址通过环境变量覆盖 `application.yml` 中硬编码的 localhost，无需改动 yml
++ 访问地址：dev `http://localhost:88`，prod `http://localhost`；登录名：`admin`，密码：`Andy@2025`
+
+**轻量本地开发**（前后端在本地跑，容器里只跑中间件）：
+
+```
+make infra                  # 只启动 mysql + redis
+# 后端: IDE 运行 ApiApplication（.env 里 MYSQL_ROOT_PASSWORD 需与 application.yml 的密码一致，
+#       或在 IDE 运行配置覆盖 SPRING_DATASOURCE_PASSWORD）
+# 前端: cd vue2 && npm run dev   （88 端口，/dev-api 已代理到 localhost:8086）
+```
+
+其他命令：`make ps` / `make logs` / `make down` / `make clean`
+
+#### 2 传统手动部署
+
+**2.1 配置MySQL**
+
++ 创建数据库`qihang-oms`
++ 导入数据库结构：sql脚本`docs/qihang-oms.sql`
+
+**2.2 启动Redis**
+
+**2.3 修改项目配置**
+
++ 修改`api`项目中的配置文件`application.yml`，配置`MySQL`、`Redis`相关配置。
+
+**2.4 后端打包**
+
++ Maven版本：`3.8`
++ 打包：`mvn clean package`，产物为`api/target/api-2.2.0.jar`
+
+**2.5 前端 `vue`打包**
+
++ 安装依赖：`npm install --registry=https://registry.npmmirror.com`
++ 打包：`npm run build:prod`
+
+**2.6 修改Nginx配置**
+
++ 完整配置参考`deploy/nginx/nginx.prod.conf`（80/443 双端口；静态文件目录`/usr/share/nginx/html`）
++ 关键代理配置如下（`proxy_pass` 尾斜杠会剥掉`/prod-api`前缀）：
+
+```
 location / {
-        root /usr/share/nginx/html;
-        index  index.html index.htm;
-        try_files $uri $uri/ /index.html;
-    }
+    root /usr/share/nginx/html;
+    index  index.html index.htm;
+    try_files $uri $uri/ /index.html;
+}
 
 location /prod-api/ {
     proxy_set_header Host $http_host;
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header REMOTE-HOST $remote_addr;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    # SSE 接口必需（关闭缓冲、延长超时）
+    proxy_http_version 1.1;
+    proxy_buffering off;
+    proxy_read_timeout 1800s;
+    proxy_send_timeout 1800s;
+    proxy_connect_timeout 60s;
+    # 前端有文件上传/Excel导入时放开上传限制
+    client_max_body_size 50m;
     proxy_pass http://localhost:8086/;
 }
 ```
 
-#### 7 访问web
+**2.7 访问web**
 + 访问地址：`http://localhost`
 + 登录名：`admin`
 + 登录密码：`Andy@2025`
