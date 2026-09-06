@@ -1,0 +1,20 @@
+// 供 JS 侧导入的样式变量（CSS Modules 模式）
+// 注意：vue-cli5 (webpack5/css-loader6) 下，非 module 的 .scss 不再把 :export 暴露给 JS，
+// 因此 JS 侧统一从本文件导入；纯样式引用请继续用 variables.scss
+
+@import './variables.scss';
+
+// the :export directive is the magic sauce for webpack
+// https://www.bluematador.com/blog/how-to-share-variables-between-js-and-sass
+:export {
+  menuColor: $base-menu-color;
+  menuLightColor: $base-menu-light-color;
+  menuColorActive: $base-menu-color-active;
+  menuBackground: $base-menu-background;
+  menuLightBackground: $base-menu-light-background;
+  subMenuBackground: $base-sub-menu-background;
+  subMenuHover: $base-sub-menu-hover;
+  sideBarWidth: $base-sidebar-width;
+  logoTitleColor: $base-logo-title-color;
+  logoLightTitleColor: $base-logo-light-title-color
+}

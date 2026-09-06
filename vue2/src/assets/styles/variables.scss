@@ -38,17 +38,4 @@ $base-sub-menu-hover:#001528;
 
 $base-sidebar-width: 200px;
 
-// the :export directive is the magic sauce for webpack
-// https://www.bluematador.com/blog/how-to-share-variables-between-js-and-sass
-:export {
-  menuColor: $base-menu-color;
-  menuLightColor: $base-menu-light-color;
-  menuColorActive: $base-menu-color-active;
-  menuBackground: $base-menu-background;
-  menuLightBackground: $base-menu-light-background;
-  subMenuBackground: $base-sub-menu-background;
-  subMenuHover: $base-sub-menu-hover;
-  sideBarWidth: $base-sidebar-width;
-  logoTitleColor: $base-logo-title-color;
-  logoLightTitleColor: $base-logo-light-title-color
-}
+// 供 JS 使用的变量已移至 variables.module.scss（vue-cli5/webpack5 下 :export 需 .module.scss 才会导出给 JS）

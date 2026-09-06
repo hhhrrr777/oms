@@ -121,13 +121,18 @@ export function filterDynamicRoutes(routes) {
   return res
 }
 
+// 动态路由视图加载：webpack5 下 babel(preset modules:'commonjs') 会把 import(变量) 转成 require(变量)，
+// 路径前缀无法静态分析，生成空 context 导致运行时 Cannot find module。
+// 改用 require.context lazy 模式显式收集视图模块，保持路由级按需分包，dev/prod 通用。
+const viewContext = require.context('../../views', true, /\.vue$/, 'lazy')
+
 export const loadView = (view) => {
-  if (process.env.NODE_ENV === 'development') {
-    return (resolve) => require([`@/views/${view}`], resolve)
-  } else {
-    // 使用 import 实现生产环境的路由懒加载
-    return () => import(`@/views/${view}`)
-  }
+  // 兼容菜单表两种组件写法：shop/merchant → shop/merchant.vue 或 shop/merchant/index.vue
+  const base = `./${view}`
+  const candidates = base.endsWith('.vue') ? [base] : [`${base}.vue`, `${base}/index.vue`]
+  const keys = viewContext.keys()
+  const key = candidates.find(k => keys.includes(k)) || candidates[0]
+  return () => viewContext(key)
 }
 
 export default permission
