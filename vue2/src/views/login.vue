@@ -1,16 +1,45 @@
 <template>
   <div class="login">
-    <div class="layout">
-      <div class="bgLeft"></div>
-      <div class="bgRight"></div>
-      <h3 class="title">{{title}}</h3>
+    <!-- 全页背景装饰层 -->
+    <div class="deco">
+      <span class="orb orb-1"></span>
+      <span class="orb orb-2"></span>
+      <span class="orb orb-3"></span>
+      <span class="ring ring-1"></span>
+      <span class="ring ring-2"></span>
+      <div class="beam"></div>
+    </div>
+
+    <!-- 左侧品牌视觉区 -->
+    <div class="login-left">
+      <div class="brand-logo">
+        <span class="logo-badge">W</span>
+        <span class="logo-name">WayF</span>
+      </div>
+
+      <div class="brand-hero">
+        <h1>一站式电商<br />订单运营管理后台</h1>
+        <p>订单 · 商品 · 库存 · 售后 · 财务，全链路数字化管理，助力业务高效增长。</p>
+      </div>
+
+      <div class="brand-foot">Copyright © 2023-2026 WayF All Rights Reserved.</div>
+    </div>
+
+    <!-- 右侧表单区 -->
+    <div class="login-right">
       <div class="login-form">
-        <div class="tabs" v-if="n !==3">
-            <div class="item" :class="n==1?'on':''" @click="n=1">后台登录</div>
+        <div class="form-brand">
+          <span class="fb-badge">W</span>
+          <div class="fb-text">
+            <div class="fb-name">WayF</div>
+            <div class="fb-slogan">电商订单运营中台</div>
+          </div>
         </div>
 
-        <!--star 密码登录-->
-        <el-form ref="loginForm" :model="loginForm" :rules="loginRules" v-if="n==1">
+        <h2 class="form-title">欢迎登录 👋</h2>
+        <div class="form-sub">请使用您的账号登录后台管理系统</div>
+
+        <el-form ref="loginForm" :model="loginForm" :rules="loginRules">
           <el-form-item prop="username">
             <el-input
               v-model="loginForm.username"
@@ -46,7 +75,12 @@
               <img :src="codeUrl" @click="getCode" class="login-code-img"/>
             </div>
           </el-form-item>
-<!--          <el-checkbox v-model="loginForm.rememberMe" style="margin:0px 0px 25px 0px;">记住密码</el-checkbox>-->
+
+          <div class="form-row">
+            <el-checkbox v-model="loginForm.rememberMe">记住密码</el-checkbox>
+            <span class="forgot" @click="forgotPwd">忘记密码？</span>
+          </div>
+
           <el-form-item style="width:100%;">
             <el-button class="btns"
                        :loading="loading"
@@ -58,17 +92,17 @@
               <span v-if="!loading">登 录</span>
               <span v-else>登 录 中...</span>
             </el-button>
-
           </el-form-item>
         </el-form>
-        <!--end 密码登录-->
 
-
+        <div class="right-foot">
+          <span @click="comingSoon">帮助中心</span>
+          <i></i>
+          <span @click="comingSoon">隐私政策</span>
+          <i></i>
+          <span @click="comingSoon">服务条款</span>
+        </div>
       </div>
-    </div>
-    <!--  底部  -->
-    <div class="el-login-footer">
-      <span>Copyright © 2023-2026 Qihang Ecom ERP V4.0 All Rights Reserved.</span>
     </div>
   </div>
 </template>
@@ -206,6 +240,12 @@ export default {
   //   }
   // },
   methods: {
+    comingSoon() {
+      this.$message("该功能暂未开放");
+    },
+    forgotPwd() {
+      this.$message("请联系系统管理员重置密码");
+    },
     getCookie() {
       const username = Cookies.get("username");
       const password = Cookies.get("password");
@@ -326,243 +366,163 @@ export default {
 
 <style rel="stylesheet/scss" lang="scss">
 .login {
-  font-family: Barlow;
   display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 800px;
-  height: 100%;
   width: 100%;
-  // background-size: cover;
-  background-image: url("../assets/images/login-background.png");
-  background-attachment: fixed;
+  height: 100%;
   overflow: hidden;
-  .layout{
-    position: relative;
-    z-index: 3;
-    height: 100%;
-  }
-  .bgLeft{
-    position: absolute;
-    width: 590px;
-    height: 590px;
-    bottom: 0;
-    left: -359px;
-    background-image: url("../assets/images/backgroundLeft.png");
-    background-size: cover;
-  }
-  .bgRight{
-    position: absolute;
-    width: 414px;
-    height: 414px;
-    top: 0;
-    right: -211px;
-    background-image: url("../assets/images/backgroundRight.png");
-    background-size: cover;
-  }
-  .title {
-    margin: 79px auto 40px;
-    text-align: center;
-    color: #000000;
-    font-size: 24px;
-    font-weight: bold;
-  }
+  position: relative;
+  font-family: "Helvetica Neue", Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: linear-gradient(150deg, #16235e 0%, #1d39c4 32%, #307dff 68%, #5aa9ff 100%);
+}
+/* 细网点纹理 */
+.login::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, .16) 1px, transparent 1px);
+  background-size: 24px 24px;
+  opacity: .4;
+  z-index: 1;
+}
 
+/* ---- 背景装饰层 ---- */
+.deco { position: absolute; inset: 0; z-index: 0; }
+.orb { position: absolute; border-radius: 50%; filter: blur(70px); }
+.orb-1 { width: 420px; height: 420px; left: -120px; top: -120px; background: rgba(105, 177, 255, .55); }
+.orb-2 { width: 380px; height: 380px; right: -100px; bottom: -80px; background: rgba(123, 92, 255, .45); }
+.orb-3 { width: 260px; height: 260px; left: 30%; bottom: 6%; background: rgba(22, 194, 163, .35); }
+.ring {
+  position: absolute; border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, .18);
+}
+.ring-1 { width: 300px; height: 300px; right: -70px; top: 8%; }
+.ring-2 { width: 200px; height: 200px; right: -20px; top: 12%; border-color: rgba(255,255,255,.12); }
+/* 斜向光束 */
+.beam {
+  position: absolute; top: -30%; left: 38%;
+  width: 220px; height: 170%;
+  background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,0));
+  transform: rotate(18deg);
+  filter: blur(6px);
+}
+
+/* ================= 左侧品牌视觉区（透明，浮于背景上） ================= */
+.login-left {
+  flex: 1.1;
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 48px 56px;
+  color: #fff;
+}
+
+.brand-logo {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 20px; font-weight: 600;
+  position: relative; z-index: 3;
+}
+.logo-badge {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: rgba(255, 255, 255, .18);
+  border: 1px solid rgba(255, 255, 255, .25);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 18px;
+  backdrop-filter: blur(4px);
+}
+.brand-hero { position: relative; z-index: 3; max-width: 460px; }
+.brand-hero h1 {
+  font-size: 36px; line-height: 1.35; font-weight: 700;
+  margin-bottom: 18px; letter-spacing: 1px;
+  text-shadow: 0 2px 20px rgba(10, 30, 90, .35);
+}
+.brand-hero p { font-size: 15px; opacity: .85; line-height: 1.9; }
+.brand-foot { position: relative; z-index: 3; font-size: 12px; opacity: .7; letter-spacing: .5px; }
+
+/* ================= 右侧表单区 ================= */
+.login-right {
+  flex: 1;
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 24px;
 }
 .login-form {
-  border-radius: 16px;
-  width: 428px;
-  min-height: 500px;
-  padding-top: 68px;
-  position: relative;
-  z-index: 9999;
-  box-shadow: 0 20px 80px 0 rgba(45,66,119,.10196);
-  background: hsla(0, 0%, 100%, .65);
-  border: 1px solid #fff;
-  .zhuce{
-    font-weight: 600;
-    height: 20px;
-    font-size: 20px;
-    line-height: 20px;
-    color: #333;
-    text-align: center;
-  }
-  .tabs{
-    display: flex;
-    padding: 0 54px;
-    text-align: center;
-    .item{
-      width: 100%;
-      height: 20px + 12px;
-      font-size: 20px;
-      line-height: 20px;
-      color: #333;
-      font-weight: 600;
-      position: relative;
-      cursor: pointer;
-      &.on{
-        color: #307dff;
-        &::after{
-          content: '';
-          position: absolute;
-          bottom: 0;
-          left: 0;
-          right: 0;
-          height: 3px;
-          width: 28px;
-          margin: 12px auto 0;
-          background-color: #307dff;
-        }
-      }
-    }
-  }
-  .el-form{
-    padding: 0px 48px 99px;
-    margin-top: 32px;
-    .btns{
-      color: #fff;
-      background-color: #307dff;
-      border-color: #307dff;
-      width: 100%;
-      border-radius: 8px;
-      padding: 15px 0;
-      font-weight: 500;
-    }
-  }
-  .el-input {
-    height: 46px;
-    input {
-      height: 46px;
-      line-height: 46px;
-      border-color: #e4e4e4;
-      border-radius: 8px;
-      padding-left: 40px;
-      color: #000000;
-    }
-  }
-  .input-icon {
-    height: 46px;
-    width: 14px;
-    margin-left: 10px;
-  }
-  .register{
-    width: 100%;
-    height: 14px;
-    line-height: 14px;
-    color: #666;
-    text-align: center;
-    font-size: 14px;
-    position: absolute;
-    bottom: 48px;
-    span{
-      font-size: 14px;
-      margin-left: 8px;
-      color: #3179f8!important;
-      cursor: pointer;
-    }
-  }
+  width: 380px;
+  background: #fff;
+  border-radius: 18px;
+  padding: 40px 38px 28px;
+  box-shadow: 0 32px 80px rgba(8, 22, 70, .35);
+  border: 1px solid rgba(255, 255, 255, .5);
 }
-.login-tip {
-  font-size: 13px;
-  text-align: center;
-  color: #bfbfbf;
+
+/* 品牌头 */
+.form-brand { display: flex; align-items: center; gap: 12px; margin-bottom: 26px; }
+.fb-badge {
+  width: 42px; height: 42px; border-radius: 12px;
+  background: linear-gradient(135deg, #307dff, #5aa9ff);
+  color: #fff; font-weight: 800; font-size: 20px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 8px 18px rgba(48, 125, 255, .35);
 }
-.login-code {
-  width: 33%;
-  height: 46px;
-  float: right;
-  .el-button{
-    height: 46px;
-    padding: 0;
-    width: 100%;
-    border-radius: 8px;
-    font-weight: bold;
-    color: #000000;
-  }
-  img {
-    cursor: pointer;
-    vertical-align: middle;
-  }
+.fb-name { font-size: 18px; font-weight: 700; color: #1f2329; line-height: 1.2; }
+.fb-slogan { font-size: 12px; color: #9aa0aa; }
+
+.form-title { font-size: 25px; font-weight: 700; color: #1f2329; margin-bottom: 8px; }
+.form-sub { color: #8a8f99; font-size: 14px; margin-bottom: 28px; }
+
+.login-form .el-form-item { margin-bottom: 20px; }
+.login-form .el-input { height: 46px; }
+.login-form .el-input input {
+  height: 46px; line-height: 46px;
+  border-color: #e4e7ed; border-radius: 8px;
+  padding-left: 40px; color: #1f2329;
+  transition: border-color .2s, box-shadow .2s;
 }
-.el-login-footer {
-  height: 40px;
-  line-height: 40px;
-  position: fixed;
-  z-index: 2;
-  bottom: 0;
-  width: 100%;
-  text-align: center;
-  color: #000000;
-  font-family: Arial;
-  font-size: 12px;
-  letter-spacing: 1px;
+.login-form .el-input input:focus {
+  border-color: #307dff;
+  box-shadow: 0 0 0 3px rgba(48, 125, 255, .12);
 }
+.input-icon { height: 46px; width: 16px; margin-left: 12px; color: #9aa0aa; }
+
+/* 记住密码 / 忘记密码 */
+.form-row {
+  display: flex; align-items: center; justify-content: space-between;
+  margin: -4px 0 18px;
+}
+.forgot { font-size: 13px; color: #307dff; cursor: pointer; }
+.forgot:hover { text-decoration: underline; }
+
+.btns {
+  width: 100%; height: 46px; padding: 0;
+  color: #fff; font-size: 15px; font-weight: 500; letter-spacing: 6px;
+  background: linear-gradient(90deg, #307dff, #4a9bff);
+  border: none; border-radius: 8px;
+  box-shadow: 0 8px 18px rgba(48, 125, 255, .3);
+}
+.btns:hover, .btns:focus { background: linear-gradient(90deg, #2f7bff, #5aa9ff); color: #fff; }
+
+/* 右下底部链接 */
+.right-foot {
+  margin-top: 28px; display: flex; align-items: center; justify-content: center;
+  gap: 12px; font-size: 12px; color: #b6bcc7;
+}
+.right-foot span { cursor: pointer; }
+.right-foot span:hover { color: #307dff; }
+.right-foot i { width: 3px; height: 3px; border-radius: 50%; background: #d5dae2; }
+
+.login-code { width: 33%; height: 46px; float: right; }
 .login-code-img {
-  height: 38px;
+  height: 46px; width: 100%; object-fit: cover;
+  border-radius: 8px; cursor: pointer; vertical-align: middle;
 }
 
-.movebox {
-  position: relative;
-  background-color: #e8e8e8;
-  width: 100%;
-  height: 46px;
-  line-height: 46px;
-  text-align: center;
-  border-radius: 8px;
-  overflow: hidden;
-  .txt {
-    position: absolute;
-    top: 0px;
-    width: 100%;
-    -moz-user-select: none;
-    -webkit-user-select: none;
-    user-select: none;
-    -o-user-select: none;
-    -ms-user-select: none;
-    font-size: 12px;
-    color: #FFFFFF;
-
-    background: -webkit-gradient(linear, left top, right top, color-stop(0, #4d4d4d), color-stop(.4, #4d4d4d), color-stop(.5, #fff), color-stop(.6, #4d4d4d), color-stop(1, #4d4d4d));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    -webkit-animation: slidetounlock 3s infinite;
-    -webkit-text-size-adjust: none;
-  }
-  .movego {
-    background-color: #7ac23c;
-    height: 46px;
-    width: 0px;
-  }
-  .move {
-    position: absolute;
-    top: 0px;
-    left: 0px;
-    width: 46px;
-    height: 46px;
-    border: 1px solid #e4e4e4;
-    cursor: move;
-    border-radius: 8px;
-    background: #fff;
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: center center;
-  }
-  .moveBefore {
-    background-image: url("../assets/icons/moveBefore.png");
-    background-size: 18px 18px;
-  }
-  .moveSuccess {
-    background-image: url("../assets/icons/moveSuccess.png");
-    background-size: 18px 18px;
-    -webkit-text-fill-color: #fff;
-  }
-}
-@keyframes slidetounlock{
-  0%{
-    background-position: -200px 0;
-  }
-  100%{
-    background-position: 200px 0;
-  }
+/* 窄屏收起左栏，只留表单 */
+@media (max-width: 900px) {
+  .login-left { display: none; }
+  .login-form { box-shadow: 0 24px 60px rgba(8, 24, 80, .3); border: none; padding: 32px 24px; }
 }
 </style>
