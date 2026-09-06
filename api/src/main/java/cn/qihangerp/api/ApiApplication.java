@@ -13,7 +13,7 @@ public class ApiApplication
 {
     public static void main( String[] args )
     {
-        System.out.println( "Hello qihang-oms!" );
+        System.out.println( "Hello OMS!" );
         SpringApplication.run(ApiApplication.class, args);
     }
 
