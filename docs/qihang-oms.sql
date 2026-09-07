@@ -2450,7 +2450,7 @@ COMMIT;
 DROP TABLE IF EXISTS `erp_merchant`;
 CREATE TABLE `erp_merchant` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '商户ID(tenantId)',
-  `login_name` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '商户登录账号',
+  `login_name` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '商户登录账号',
   `nick_name` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '用户昵称',
   `mobile` varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT '' COMMENT '手机号码',
   `avatar` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT '' COMMENT '头像地址',

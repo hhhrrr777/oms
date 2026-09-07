@@ -8,8 +8,10 @@ import cn.qihangerp.service.OShopService;
 import cn.qihangerp.security.common.BaseController;
 import cn.qihangerp.security.common.SecurityUtils;
 import cn.qihangerp.service.*;
+import cn.qihangerp.enums.HttpStatus;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.AllArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
@@ -58,9 +60,17 @@ public class MerchantController extends BaseController {
 
     @PostMapping("/add")
     public AjaxResult add(@RequestBody MerchantAddBo bo) {
-
-        ResultVo<ErpMerchant> resultVo = merchantService.add(bo, getUsername());
-        return AjaxResult.success();
+        try {
+            ResultVo<ErpMerchant> resultVo = merchantService.add(bo, getUsername());
+            if (resultVo.getCode() != ResultVoEnum.SUCCESS.getIndex()) {
+                return AjaxResult.error(resultVo.getCode(), resultVo.getMsg());
+            }
+            ErpMerchant merchant = resultVo.getData();
+            return AjaxResult.success(merchant == null ? null : merchant.getId());
+        } catch (DataIntegrityViolationException ex) {
+            logger.error("新增商户数据校验失败", ex);
+            return AjaxResult.error(HttpStatus.CONFLICT, "商户数据保存失败，请检查数据库字段约束");
+        }
     }
 
     @PutMapping("/edit")

@@ -229,9 +229,14 @@ export default {
       // 表单参数
       form: {
         id: null,
-        loginName: null,
-        loginPwd: null,
-        cloudWarehouseIds: null
+        name: null,
+        number: null,
+        usci: null,
+        faren: null,
+        linkMan: null,
+        mobile: null,
+        address: null,
+        remark: null
       },
       // 表单校验
       rules: {
@@ -242,7 +247,7 @@ export default {
         linkMan: [{ required: true, message: '不能为空', trigger: 'blur' }],
         mobile: [{ required: true, message: '不能为空', trigger: 'blur' }],
         address: [{ required: true, message: '不能为空', trigger: 'blur' }]
-      },
+      }
     }
   },
   created() {
@@ -269,9 +274,14 @@ export default {
     reset() {
       this.form = {
         id: null,
-        loginName: null,
-        loginPwd: null,
-        cloudWarehouseIds: null
+        name: null,
+        number: null,
+        usci: null,
+        faren: null,
+        linkMan: null,
+        mobile: null,
+        address: null,
+        remark: null
       }
       this.resetForm('form')
     },
@@ -318,7 +328,17 @@ export default {
               this.getList()
             })
           } else {
-            addMerchant(this.form).then(response => {
+            const payload = {
+              name: this.form.name,
+              number: this.form.number,
+              usci: this.form.usci,
+              faren: this.form.faren,
+              linkMan: this.form.linkMan,
+              mobile: this.form.mobile,
+              address: this.form.address,
+              remark: this.form.remark
+            }
+            addMerchant(payload).then(response => {
               this.$modal.msgSuccess('新增成功')
               this.open = false
               this.getList()
